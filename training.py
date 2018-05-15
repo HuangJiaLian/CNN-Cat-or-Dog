@@ -4,26 +4,28 @@ import tensorflow as tf
 import input_data
 import model
 
-#%%
 
-N_CLASSES = 2
-IMG_W = 208  # resize the image, if the input image is too large, training will be very slow.
+N_CLASSES = 2 # 二分类
+IMG_W = 208  # 统一图片的长和宽
 IMG_H = 208
 BATCH_SIZE = 100
 CAPACITY = 2000
-MAX_STEP = 15000 # with current parameters, it is suggested to use MAX_STEP>10k
-learning_rate = 0.0001 # with current parameters, it is suggested to use learning rate<0.0001
+MAX_STEP = 15000
+learning_rate = 0.0001
 
 
-#%%
+
 def run_training():
-    # you need to change the directories to yours.
-    DIR_PRE = '/home/dell01/github/CNN-Cat-or-Dog/'
+    DIR_PRE = os.getcwd() + '/'
     train_dir = DIR_PRE + 'data/train/'
     logs_train_dir = DIR_PRE + 'logs/train/'
+    os.makedirs(train_dir, exist_ok=True)
+    os.makedirs(logs_train_dir,exist_ok=True)
 
+    # 获取所有图片文件列表和对应的标签列表
     train, train_label = input_data.get_files(train_dir)
 
+    #
     train_batch, train_label_batch = input_data.get_batch(train,
                                                           train_label,
                                                           IMG_W,

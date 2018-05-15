@@ -23,24 +23,22 @@ def get_one_image(train):
    '''Randomly pick one image from training data
    Return: ndarray
    '''
+   global imageForShow
    n = len(train)
    ind = np.random.randint(0, n)
    img_dir = train[ind]
 
    image = Image.open(img_dir)
-   plt.imshow(image)
-   plt.show()
+   imageForShow = image
+   # plt.imshow(image)
+   # plt.show()
    image = image.resize([208, 208])
    image = np.array(image)
    return image
 
 
 def evaluate_one_image():
-   '''Test one image against the saved models and parameters
-   '''
-
-   # you need to change the directories to yours.
-   DIR_PRE = '/home/dell01/github/CNN-Cat-or-Dog/'
+   DIR_PRE = os.getcwd() + '/'
    test_dir = DIR_PRE + 'data/test1/'
    test = get_test_file(test_dir)
    image_array = get_one_image(test)
@@ -56,8 +54,7 @@ def evaluate_one_image():
        logit = tf.nn.softmax(logit)
        x = tf.placeholder(tf.float32, shape=[208, 208, 3])
 
-       # you need to change the directories to yours.
-       DIR_PRE = '/home/dell01/github/CNN-Cat-or-Dog/'
+       DIR_PRE = os.getcwd() + '/'
        logs_train_dir = DIR_PRE + 'logs/train/'
 
        saver = tf.train.Saver()
@@ -77,8 +74,12 @@ def evaluate_one_image():
            max_index = np.argmax(prediction)
            if max_index==0:
                print('This is a cat with possibility %.6f' %prediction[:, 0])
+               plt.title("This is a cat")
            else:
                print('This is a dog with possibility %.6f' %prediction[:, 1])
-
+               plt.title("This is a dog")
+           plt.imshow(imageForShow)
+           plt.show()
 
 evaluate_one_image()
+

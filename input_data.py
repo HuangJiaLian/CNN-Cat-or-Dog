@@ -7,10 +7,10 @@ img_height = 208
 
 '''
 获得图片以及对应的标签
-Args: 
-    file_dir: file directory 
+Input: 
+    图片的路径 
 Returns:
-    list of images and labels
+    图片列表和图片标签列表
 '''
 def get_files(file_dir):
     cats = []
@@ -39,33 +39,36 @@ def get_files(file_dir):
     # print(temp)
 
     image_list = list(temp[:,0])
-    print(image_list)
+    # print(image_list)
     lable_list = list(temp[:,1])
     # print(lable_list)
     # Change str to int
     lable_list = [int(i) for i in lable_list]
-    print(lable_list)
+    # print(lable_list)
 
     return image_list, lable_list
 
 '''
 获得批次
+对图片一批一批地处理
 '''
-def get_batch(image, label, image_W, image_H, batch_size, capacity):
+def get_batch(image_list, label, image_W, image_H, batch_size, capacity):
 
-    image = tf.cast(image, tf.string)
+    image = tf.cast(image_list, tf.string)
     label = tf.cast(label, tf.int32)
 
     # 生成一个队列
     input_queue = tf.train.slice_input_producer([image,label])
-
     label = input_queue[1]
     image_contents = tf.read_file(input_queue[0])
     image = tf.image.decode_jpeg(image_contents, channels=3)
 
     # 此处可以添加一些图像处理功能
+    # image  = tf.image.
 
     image = tf.image.resize_image_with_crop_or_pad(image,image_W,image_H)
+    # image = tf.image.resize_images(image, [image_W, image_H])
+    # image = tf.image.resize_nearest_neighbor(image, [image_W,image_H], align_corners=False, name=None)
     image = tf.image.per_image_standardization(image)
 
     image_batch, label_batch = tf.train.batch([image, label], batch_size=batch_size,
@@ -82,8 +85,8 @@ def get_batch(image, label, image_W, image_H, batch_size, capacity):
 # import matplotlib.pyplot as plt
 # BATCH_SIZE = 10
 # CAPACITY = 512
-# IMG_W = 208
-# IMG_H = 208
+# IMG_W = 500
+# IMG_H = 500
 # train_dir = 'data/train/'
 #
 # image_list, label_list = get_files(train_dir)
