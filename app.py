@@ -19,19 +19,17 @@ def get_test_file(file_dir):
     return image_list
 
 
-def get_one_image(train):
-   '''Randomly pick one image from training data
+def get_one_image(test):
+   '''Randomly pick one image from test data
    Return: ndarray
    '''
    global imageForShow
-   n = len(train)
+   n = len(test)
    ind = np.random.randint(0, n)
-   img_dir = train[ind]
+   img_dir = test[ind]
 
    image = Image.open(img_dir)
    imageForShow = image
-   # plt.imshow(image)
-   # plt.show()
    image = image.resize([208, 208])
    image = np.array(image)
    return image
@@ -40,22 +38,26 @@ def get_one_image(train):
 def evaluate_one_image():
    DIR_PRE = os.getcwd() + '/'
    test_dir = DIR_PRE + 'data/test1/'
-   test = get_test_file(test_dir)
-   image_array = get_one_image(test)
+   logs_train_dir = DIR_PRE + 'logs/train/'
+
+
 
    with tf.Graph().as_default():
+
+       test = get_test_file(test_dir)
+       image_array = get_one_image(test)
+
        BATCH_SIZE = 1
        N_CLASSES = 2
 
-       image = tf.cast(image_array, tf.float32)
-       image = tf.image.per_image_standardization(image)
-       image = tf.reshape(image, [1, 208, 208, 3])
-       logit = model.inference(image, BATCH_SIZE, N_CLASSES)
-       logit = tf.nn.softmax(logit)
+       # image = tf.cast(image_array, tf.float32)
+       # image = tf.image.per_image_standardization(image)
+       # image = tf.reshape(image, [1, 208, 208, 3])
+       image = tf.reshape(tf.image.per_image_standardization(tf.cast(image_array, tf.float32)), [1, 208, 208, 3])
+       # logit = model.inference(image, BATCH_SIZE, N_CLASSES)
+       # logit = tf.nn.softmax(logit)
+       logit = tf.nn.softmax(model.inference(image, BATCH_SIZE, N_CLASSES))
        x = tf.placeholder(tf.float32, shape=[208, 208, 3])
-
-       DIR_PRE = os.getcwd() + '/'
-       logs_train_dir = DIR_PRE + 'logs/train/'
 
        saver = tf.train.Saver()
 
@@ -70,16 +72,19 @@ def evaluate_one_image():
            else:
                print('No checkpoint file found')
 
-           prediction = sess.run(logit, feed_dict={x: image_array})
-           max_index = np.argmax(prediction)
-           if max_index==0:
-               print('This is a cat with possibility %.6f' %prediction[:, 0])
-               plt.title("This is a cat")
-           else:
-               print('This is a dog with possibility %.6f' %prediction[:, 1])
-               plt.title("This is a dog")
-           plt.imshow(imageForShow)
-           plt.show()
+           while True:
+               image_array = get_one_image(test)
+               # print(image_array)
+               prediction = sess.run(logit, feed_dict={x: image_array})
+               max_index = np.argmax(prediction)
+               if max_index==0:
+                   print('This is a cat with possibility %.6f' %prediction[:, 0])
+                   plt.title("This is a cat")
+               else:
+                   print('This is a dog with possibility %.6f' %prediction[:, 1])
+                   plt.title("This is a dog")
+               plt.imshow(imageForShow)
+               plt.show()
 
 evaluate_one_image()
 
